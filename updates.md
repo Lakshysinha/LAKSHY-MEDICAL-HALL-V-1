@@ -1,6 +1,35 @@
 # Updated things
 
 ## Current progress
+- Upgraded the project from a simple frontend demo into a fuller runnable pharmacy management app covering all five README phases in one browser app.
+- Added role/user switching for Owner/Admin, Pharmacist, and Staff/Billing workflows.
+- Added medicine master entry with name, composition, brand, manufacturer, batch, MFG/EXP, stock, rate, reorder level, notes, and QR/barcode fields.
+- Added schema-style local collections for medicines, sales, stock transactions, audit logs, customer records, and settings.
+- Added validation for EXP Date greater than MFG Date, non-negative stock, required payment mode, and preventing sales above available stock.
+- Added search/scanner-style lookup by medicine name, composition, brand, batch number, or code with “Medicine Available” / “No medicine available” results.
+- Added automatic Short List logic for medicines with stock quantity `<= 3` plus expiring-soon alerts.
+- Added Sales Entry with quantity sold, tablets sold, strips sold, unit/rate, customer name, and Cash/Online payment mode.
+- Added automatic inventory reduction after every valid sale and stock movement records for sale, stock in, and stock out events.
+- Added daily dashboard/report totals for medicines sold, total sales amount, cash total, online total, and transaction rows.
+- Added customer history for named customers.
+- Added audit logs for medicine edits, stock transactions, and sale entries.
+- Added backup export/import controls, reset demo data control, and a go-live/training checklist.
+- Added reusable app-core logic and automated Node tests for validations, sales, totals, search, audit, and stock transactions.
+- Added local browser storage so medicine, sales, users, audit, customer, and stock movement records remain available after refresh.
+
+## Done from README plan
+- Phase 1 Requirement Finalization & Workflow Mapping: implemented as role switcher, module sections, medicine form, search/scanner flow, sales form, daily dashboard, and phase tracker.
+- Phase 2 Data Model & System Design: implemented locally with schema-style collections, validation rules, stock transactions, customer records, settings, and audit logs.
+- Phase 3 Core Feature Development: implemented medicine module, batch stock, search, simulated scanner lookup, low-stock automation, sales entry, inventory update, customer record, and reporting dashboard.
+- Phase 4 Testing, Validation & Reliability: added reusable core functions and Node tests for key logic; added backup/restore UI for operational safety.
+- Phase 5 Deployment, Training & Operational Rollout: added export/import backup controls and a go-live/training checklist inside the running app.
+
+## Still pending / future production improvements
+- Replace local browser storage with a real backend database and API server.
+- Replace simulated scanner lookup with live camera barcode/QR scanning.
+- Add real authentication sessions, passwords, and server-enforced role permissions.
+- Add invoice printing, GST-ready reporting, supplier purchase orders, and cloud backup scheduling.
+- Run browser-based end-to-end tests once a browser engine is available in the environment.
 - Built a runnable single-page pharmacy management app for Lakshy Medical Hall.
 - Added medicine master entry with name, composition, brand, manufacturer, batch, MFG/EXP, stock, rate, notes, and QR/code fields.
 - Added validation so EXP Date must be greater than MFG Date.
