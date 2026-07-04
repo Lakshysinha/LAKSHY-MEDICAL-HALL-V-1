@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lakshy Medical Hall | Complete Pharmacy Manager</title>
+  <meta name="theme-color" content="#087f8c" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="topbar">
+      <div class="brand"><span class="brand-mark">LMH</span><div><strong>Lakshy Medical Hall</strong><small>Company-ready offline pharmacy app</small></div></div>
+      <div class="user-switch"><label>Role<select id="roleSelect"><option>Owner/Admin</option><option>Pharmacist</option><option>Staff/Billing user</option></select></label><input id="userName" value="Owner" aria-label="User name" /></div>
+    </nav>
+    <section class="hero-grid">
+      <div><p class="eyebrow">Medicine • Inventory • Sales • Reports</p><h1>One running app for every pharmacy workflow.</h1><p class="hero-copy">Built from the README phases: medicine master, batch stock, scanner-style lookup, short list, sales, payment split, customer records, audit logs, backups, and rollout checklist.</p><div class="hero-actions"><a href="#medicine" class="button primary">Add Medicine</a><a href="#sales" class="button secondary">Record Sale</a><a href="#operations" class="button ghost">Operations</a></div></div>
+      <div class="hero-card"><span>Today’s Sales</span><strong id="heroSales">₹0</strong><small><span id="heroItems">0</span> medicines sold • <span id="activeUser">Owner/Admin</span></small></div>
+    </section>
+  </header>
+
+  <main>
+    <section class="stats" aria-label="Shop summary">
+      <article><span>Total Medicines</span><strong id="totalMedicines">0</strong></article>
+      <article><span>Low Stock (≤3)</span><strong id="lowStockCount">0</strong></article>
+      <article><span>Expiring Soon</span><strong id="expiringCount">0</strong></article>
+      <article><span>Audit Events</span><strong id="auditCount">0</strong></article>
+    </section>
+
+    <section class="panel phase-panel">
+      <div class="section-heading"><p class="eyebrow">README phase tracker</p><h2>Implementation Progress</h2></div>
+      <div class="phase-grid" id="phaseGrid"></div>
+    </section>
+
+    <section class="panel" id="medicine">
+      <div class="section-heading"><p class="eyebrow">Phase 1 + Phase 3</p><h2>Medicine Master & Batch Inventory</h2></div>
+      <form id="medicineForm" class="form-grid">
+        <label>Medicine Name<input id="medicineName" required placeholder="Paracetamol 500" /></label>
+        <label>Generic / Composition<input id="composition" placeholder="Paracetamol" /></label>
+        <label>Brand<input id="brand" placeholder="Brand name" /></label>
+        <label>Manufacturer<input id="manufacturer" placeholder="Company" /></label>
+        <label>Batch No.<input id="batch" required placeholder="BCH-001" /></label>
+        <label>MFG Date<input id="mfg" type="date" required /></label>
+        <label>EXP Date<input id="exp" type="date" required /></label>
+        <label>Quantity / Stock<input id="stock" type="number" min="0" required /></label>
+        <label>Price / Rate<input id="price" type="number" min="0" step="0.01" required /></label>
+        <label>Reorder Level<input id="reorderLevel" type="number" min="0" value="3" /></label>
+        <label>QR / Barcode Value<input id="code" placeholder="Scan or type code" /></label>
+        <label class="wide">Label / Notes<input id="notes" placeholder="Storage, dosage notes, rack location" /></label>
+        <button class="button primary" type="submit">Save Medicine</button>
+      </form>
+      <p id="medicineMessage" class="message" role="status"></p>
+      <div class="table-wrap"><table><thead><tr><th>Medicine</th><th>Batch</th><th>Stock</th><th>EXP</th><th>Rate</th><th>Status</th></tr></thead><tbody id="medicineTable"></tbody></table></div>
+    </section>
+
+    <section class="two-column">
+      <article class="panel" id="search"><div class="section-heading"><p class="eyebrow">Phase 3 scanner/search</p><h2>Find Medicine</h2></div><div class="search-row"><input id="searchInput" placeholder="Search by name, composition, brand, batch, or code" /><button id="searchButton" class="button secondary">Search</button><button id="scanButton" class="button ghost" type="button">Simulate Scan</button></div><div id="searchResult" class="result-card">Search displays availability here.</div></article>
+      <article class="panel short-list"><div class="section-heading"><p class="eyebrow">Low stock + expiry alerts</p><h2>Short List</h2></div><ul id="shortList"></ul></article>
+    </section>
+
+    <section class="panel" id="sales">
+      <div class="section-heading"><p class="eyebrow">Phase 3 sales + customer record</p><h2>Sales Entry</h2></div>
+      <form id="salesForm" class="form-grid">
+        <label>Medicine Batch<select id="saleMedicine" required></select></label>
+        <label>Quantity Sold<input id="saleQuantity" type="number" min="1" value="1" required /></label>
+        <label>Tablets Sold<input id="tablets" type="number" min="0" value="0" /></label>
+        <label>Strips Sold<input id="strips" type="number" min="0" value="0" /></label>
+        <label>Unit / Rate<input id="saleRate" type="number" min="0" step="0.01" required /></label>
+        <label>Payment Mode<select id="paymentMode" required><option>Cash</option><option>Online</option></select></label>
+        <label class="wide">Customer Name (optional)<input id="customer" placeholder="Walk-in customer" /></label>
+        <button class="button primary" type="submit">Record Sale</button>
+      </form><p id="saleMessage" class="message" role="status"></p>
+    </section>
+
+    <section class="panel" id="reports"><div class="section-heading"><p class="eyebrow">Phase 3 + Phase 4</p><h2>Daily Sales & Payment Summary</h2></div><div class="report-grid"><article><span>Total medicines sold</span><strong id="reportSold">0</strong></article><article><span>Total sales amount</span><strong id="reportAmount">₹0</strong></article><article><span>Cash sales</span><strong id="reportCash">₹0</strong></article><article><span>Online sales</span><strong id="reportOnline">₹0</strong></article></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>Medicine</th><th>Batch</th><th>Qty</th><th>Tablets</th><th>Strips</th><th>Payment</th><th>Total</th><th>Customer</th></tr></thead><tbody id="salesTable"></tbody></table></div></section>
+
+    <section class="two-column" id="operations">
+      <article class="panel"><div class="section-heading"><p class="eyebrow">Phase 2 + audit</p><h2>Stock Transactions</h2></div><form id="stockForm" class="compact-form"><label>Batch<select id="stockBatch"></select></label><label>Type<select id="stockType"><option>Stock In</option><option>Stock Out</option></select></label><label>Quantity<input id="stockQuantity" type="number" min="1" value="1" /></label><label>Note<input id="stockNote" placeholder="Purchase, correction, return" /></label><button class="button secondary" type="submit">Save Movement</button></form><ul id="stockTimeline" class="timeline"></ul></article>
+      <article class="panel"><div class="section-heading"><p class="eyebrow">Phase 5 operations</p><h2>Backup, Training & Go-live</h2></div><div class="ops-actions"><button id="exportButton" class="button primary">Export Backup JSON</button><button id="csvButton" class="button secondary">Export Sales CSV</button><button id="printButton" class="button secondary">Print Daily Report</button><label class="file-button">Import Backup<input id="importInput" type="file" accept="application/json" /></label><button id="resetButton" class="button danger">Reset Demo Data</button></div><ol class="checklist"><li>IndexedDB storage for heavier offline data than localStorage</li><li>Offline install support through PWA manifest and service worker</li><li>Master data import/export ready</li><li>User roles available in header</li><li>Daily closing report visible</li><li>Audit log records edits and sales</li><li>Backup export/import available</li></ol></article>
+    </section>
+
+    <section class="two-column">
+      <article class="panel"><div class="section-heading"><p class="eyebrow">Supplier purchase module</p><h2>Company Purchase Entry</h2></div><form id="purchaseForm" class="compact-form"><label>Batch<select id="purchaseBatch"></select></label><label>Supplier<input id="supplierName" placeholder="Distributor / company" /></label><label>Quantity<input id="purchaseQuantity" type="number" min="1" value="1" /></label><label>Unit Cost<input id="purchaseCost" type="number" min="0" step="0.01" value="0" /></label><label class="wide">Invoice No.<input id="purchaseInvoice" placeholder="Company invoice number" /></label><button class="button primary" type="submit">Add Purchase</button></form><ul id="supplierList" class="timeline"></ul></article>
+      <article class="panel company-card"><div class="section-heading"><p class="eyebrow">Commercial readiness</p><h2>Ready to Sell to a Company</h2></div><ul class="checklist"><li>Offline-first browser app with installable PWA shell</li><li>IndexedDB storage designed for thousands of local records</li><li>Audit log for accountable business use</li><li>JSON backup/import for data portability</li><li>CSV sales export and printable daily report for business handover</li></ul></article>
+    </section>
+
+    <section class="two-column"><article class="panel"><div class="section-heading"><p class="eyebrow">Customer history</p><h2>Customer Records</h2></div><ul id="customerList" class="timeline"></ul></article><article class="panel"><div class="section-heading"><p class="eyebrow">Security audit</p><h2>Audit Logs</h2></div><ul id="auditList" class="timeline"></ul></article></section>
+  </main>
+
+  <script src="app-core.js"></script>
+  <script src="storage.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
