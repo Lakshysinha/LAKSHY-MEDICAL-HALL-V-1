@@ -33,6 +33,9 @@
       auditLogs: [],
       customers: [],
       suppliers: [],
+      stockTransactions: [],
+      auditLogs: [],
+      customers: [],
       settings: { lowStockThreshold: LOW_STOCK_THRESHOLD, backupEnabled: true }
     };
   }
@@ -164,6 +167,7 @@
   }
 
   const api = { LOW_STOCK_THRESHOLD, money, todayKey, validateDates, isLowStock, isExpiringSoon, buildInitialState, addAudit, upsertMedicine, createStockTransaction, createPurchase, createSale, dailyTotals, searchMedicines };
+  const api = { LOW_STOCK_THRESHOLD, money, todayKey, validateDates, isLowStock, isExpiringSoon, buildInitialState, addAudit, upsertMedicine, createStockTransaction, createSale, dailyTotals, searchMedicines };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.LMHCore = api;
