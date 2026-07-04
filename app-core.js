@@ -28,6 +28,11 @@
       currentUser: { name: 'Owner', role: 'Owner/Admin' },
       medicines: seedMedicines,
       sales: [],
+      purchases: [],
+      stockTransactions: [],
+      auditLogs: [],
+      customers: [],
+      suppliers: [],
       stockTransactions: [],
       auditLogs: [],
       customers: [],
@@ -78,6 +83,34 @@
     state.stockTransactions.unshift(transaction);
     addAudit(state, 'STOCK_TRANSACTION', `${type} ${transaction.quantity} for ${medicine.name}`, user);
     return transaction;
+  }
+
+  function createPurchase(state, purchaseInput, user) {
+    const medicine = state.medicines.find(item => item.batch === purchaseInput.batch);
+    if (!medicine) throw new Error('Medicine batch not found.');
+    const quantity = Math.abs(Number(purchaseInput.quantity));
+    const unitCost = Number(purchaseInput.unitCost || 0);
+    if (quantity <= 0) throw new Error('Purchase quantity must be greater than zero.');
+
+    medicine.stock = Number(medicine.stock) + quantity;
+    const purchase = {
+      id: `PUR-${Date.now()}`,
+      date: todayKey(),
+      supplier: purchaseInput.supplier?.trim() || 'Unknown supplier',
+      medicineName: medicine.name,
+      batch: medicine.batch,
+      quantity,
+      unitCost,
+      total: quantity * unitCost,
+      invoice: purchaseInput.invoice?.trim() || 'N/A'
+    };
+    state.purchases.unshift(purchase);
+    if (purchase.supplier !== 'Unknown supplier') {
+      state.suppliers.unshift({ name: purchase.supplier, date: purchase.date, purchaseId: purchase.id, amount: purchase.total });
+    }
+    state.stockTransactions.unshift({ date: purchase.date, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), medicineName: purchase.medicineName, batch: purchase.batch, type: 'Purchase', quantity, note: purchase.invoice });
+    addAudit(state, 'PURCHASE_CREATED', `${purchase.medicineName} x ${quantity} from ${purchase.supplier}`, user);
+    return purchase;
   }
 
   function createSale(state, saleInput, user) {
@@ -133,6 +166,7 @@
     return medicines.filter(item => [item.name, item.composition, item.brand, item.batch, item.code].some(value => String(value || '').toLowerCase().includes(normalized)));
   }
 
+  const api = { LOW_STOCK_THRESHOLD, money, todayKey, validateDates, isLowStock, isExpiringSoon, buildInitialState, addAudit, upsertMedicine, createStockTransaction, createPurchase, createSale, dailyTotals, searchMedicines };
   const api = { LOW_STOCK_THRESHOLD, money, todayKey, validateDates, isLowStock, isExpiringSoon, buildInitialState, addAudit, upsertMedicine, createStockTransaction, createSale, dailyTotals, searchMedicines };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

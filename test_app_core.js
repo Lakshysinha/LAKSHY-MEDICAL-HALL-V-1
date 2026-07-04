@@ -27,4 +27,9 @@ assert.equal(core.searchMedicines(state.medicines, 'code2').length, 1);
 core.createStockTransaction(state, 'B1', 'Stock In', 4, 'Purchase', { name: 'Tester', role: 'Pharmacist' });
 assert.equal(state.medicines.find(item => item.batch === 'B1').stock, 7);
 
+const purchase = core.createPurchase(state, { batch: 'B1', supplier: 'ABC Pharma', quantity: 10, unitCost: 6, invoice: 'INV-1' }, { name: 'Tester', role: 'Owner/Admin' });
+assert.equal(purchase.total, 60);
+assert.equal(state.medicines.find(item => item.batch === 'B1').stock, 17);
+assert.equal(state.suppliers[0].name, 'ABC Pharma');
+
 console.log('All app-core tests passed');

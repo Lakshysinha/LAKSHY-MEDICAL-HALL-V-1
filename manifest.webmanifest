@@ -1,0 +1,9 @@
+{
+  "name": "Lakshy Medical Hall Pharmacy Manager",
+  "short_name": "LMH Pharmacy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4fbfb",
+  "theme_color": "#087f8c",
+  "description": "Offline-capable pharmacy management app for medicine inventory, sales, reports, audit logs, and backups."
+}

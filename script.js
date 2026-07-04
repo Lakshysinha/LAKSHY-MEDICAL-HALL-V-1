@@ -1,3 +1,4 @@
+const { money, todayKey, isLowStock, isExpiringSoon, buildInitialState, upsertMedicine, createStockTransaction, createPurchase, createSale, dailyTotals, searchMedicines } = window.LMHCore;
 const { money, todayKey, validateDates, isLowStock, isExpiringSoon, buildInitialState, upsertMedicine, createStockTransaction, createSale, dailyTotals, searchMedicines } = window.LMHCore;
 
 const seedMedicines = [
@@ -9,6 +10,14 @@ const seedMedicines = [
 
 const phaseItems = [
   ['Phase 1', 'Roles, modules, forms, and workflow mapping are available in the running UI.'],
+  ['Phase 2', 'IndexedDB-backed local collections, validation, stock movement, customer records, suppliers, and audit logs are implemented.'],
+  ['Phase 3', 'Medicine, search, short list, sales, purchases, inventory update, and reports are implemented.'],
+  ['Phase 4', 'Validation helpers and automated Node tests cover critical rules.'],
+  ['Phase 5', 'PWA offline shell, backup export/import, CSV export, printable report, and go-live checklist are available.']
+];
+
+let state = buildInitialState(seedMedicines);
+let storageReady = false;
   ['Phase 2', 'Local schema-style collections, validation, stock movement, customer records, and audit logs are implemented.'],
   ['Phase 3', 'Medicine, search, short list, sales, inventory update, and reports are implemented.'],
   ['Phase 4', 'Validation helpers and automated Node tests cover critical rules.'],
@@ -23,6 +32,9 @@ function currentUser() {
   return state.currentUser;
 }
 
+async function save() {
+  if (storageReady) await window.LMHStorage.setState(state);
+}
 function save() {
   localStorage.setItem('lmhCompleteState', JSON.stringify(state));
 }
@@ -71,6 +83,7 @@ function renderMedicineOptions() {
   const options = state.medicines.map(medicine => `<option value="${medicine.batch}">${medicine.name} • ${medicine.batch} • Stock ${medicine.stock}</option>`).join('');
   saleMedicine.innerHTML = options;
   stockBatch.innerHTML = options;
+  purchaseBatch.innerHTML = options;
   const selected = state.medicines.find(medicine => medicine.batch === saleMedicine.value) || state.medicines[0];
   saleRate.value = selected ? selected.price : 0;
 }
@@ -101,6 +114,7 @@ function renderReports() {
 function renderOperations() {
   stockTimeline.innerHTML = rows(state.stockTransactions.slice(0, 8), '<li>No stock movements yet.</li>', item => `<li><strong>${item.type}</strong><span>${item.medicineName} (${item.batch}) • ${item.quantity} • ${item.note || 'No note'}</span></li>`);
   customerList.innerHTML = rows(state.customers.slice(0, 8), '<li>No named customer records yet.</li>', item => `<li><strong>${item.name}</strong><span>${item.date} • ${item.saleId} • ${money(item.amount)}</span></li>`);
+  supplierList.innerHTML = rows((state.suppliers || []).slice(0, 8), '<li>No supplier purchases yet.</li>', item => `<li><strong>${item.name}</strong><span>${item.date} • ${item.purchaseId} • ${money(item.amount)}</span></li>`);
   auditList.innerHTML = rows(state.auditLogs.slice(0, 10), '<li>No audit logs yet.</li>', item => `<li><strong>${item.action}</strong><span>${new Date(item.time).toLocaleString()} • ${item.user} (${item.role}) • ${item.detail}</span></li>`);
 }
 
@@ -159,6 +173,17 @@ stockForm.addEventListener('submit', event => {
   }
 });
 
+purchaseForm.addEventListener('submit', event => {
+  event.preventDefault();
+  try {
+    createPurchase(state, { batch: purchaseBatch.value, supplier: supplierName.value, quantity: purchaseQuantity.value, unitCost: purchaseCost.value, invoice: purchaseInvoice.value }, currentUser());
+    purchaseForm.reset();
+    render();
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
 function displaySearch(query) {
   const matches = searchMedicines(state.medicines, query);
   searchResult.innerHTML = matches.length
@@ -186,17 +211,51 @@ exportButton.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+csvButton.addEventListener('click', () => {
+  const header = ['Date', 'Time', 'Medicine', 'Batch', 'Qty', 'Payment', 'Total', 'Customer'];
+  const csvRows = state.sales.map(sale => [sale.date, sale.time, sale.medicineName, sale.batch, sale.quantity, sale.paymentMode, sale.total, sale.customer].map(value => `"${String(value).replaceAll('\"', '\"\"')}"`).join(','));
+  const blob = new Blob([[header.join(','), ...csvRows].join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `lakshy-medical-hall-sales-${todayKey()}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+});
+
+printButton.addEventListener('click', () => window.print());
+
 importInput.addEventListener('change', event => {
   const [file] = event.target.files;
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
     state = JSON.parse(reader.result);
+    state.purchases ||= [];
+    state.suppliers ||= [];
     render();
   };
   reader.readAsText(file);
 });
 
+resetButton.addEventListener('click', async () => {
+  state = buildInitialState(seedMedicines);
+  await window.LMHStorage.clearState();
+  render();
+});
+
+async function boot() {
+  const migrated = window.LMHStorage.migrateLocalStorage();
+  const stored = await window.LMHStorage.getState();
+  state = stored || migrated || buildInitialState(seedMedicines);
+  state.purchases ||= [];
+  state.suppliers ||= [];
+  storageReady = true;
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+  render();
+}
+
+boot();
 resetButton.addEventListener('click', () => {
   state = buildInitialState(seedMedicines);
   render();
